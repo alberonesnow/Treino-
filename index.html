@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e8590c">
+<title>Meu Treino</title>
+<style>
+:root{--bg:#f6f7f9;--cd:#fff;--tx:#14181f;--mu:#667085;--ac:#e8590c;--ok:#2f9e44;--bd:#e3e6eb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1217;--cd:#1a1f27;--tx:#eef1f5;--mu:#98a2b3;--bd:#2a313c}}
+:root[data-theme="dark"]{--bg:#0f1217;--cd:#1a1f27;--tx:#eef1f5;--mu:#98a2b3;--bd:#2a313c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,Roboto,sans-serif;padding-bottom:96px}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+header{padding:16px 16px 8px}
+h1{font-size:20px;margin:0}
+.sub{color:var(--mu);font-size:14px}
+nav{display:flex;gap:6px;padding:8px 16px;overflow-x:auto}
+nav button{flex:0 0 auto;border:1px solid var(--bd);background:var(--cd);color:var(--tx);border-radius:20px;padding:8px 14px;font-size:14px}
+nav button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+nav button.td{font-weight:700}
+main{padding:0 16px}
+.bar{height:6px;background:var(--bd);border-radius:3px;margin:8px 0 12px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.cd{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:10px}
+.cd.done{border-color:var(--ok)}
+.t{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.t span{color:var(--mu);font-weight:400;font-size:14px;white-space:nowrap}
+.sets{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap}
+.sets button{width:44px;height:44px;border-radius:50%;border:2px solid var(--bd);background:transparent;color:var(--tx);font-size:16px}
+.sets button.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.sets input{width:84px;height:44px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);padding:0 10px;font-size:16px;margin-left:auto}
+details{font-size:14px;color:var(--mu)}
+summary{cursor:pointer;padding:4px 0}
+.gif{background:var(--bg);border:1px dashed var(--bd);border-radius:10px;min-height:120px;display:flex;align-items:center;justify-content:center;margin:8px 0;text-align:center;padding:8px}
+.gif img{max-width:100%;border-radius:8px}.gif svg{width:100%;max-width:240px;height:auto;stroke:var(--tx);stroke-width:5;stroke-linecap:round;fill:none}.gif line.m{stroke:var(--ac)}.gif circle{stroke-width:4}
+a{color:var(--ac)}
+.hd{padding:10px 0;border-bottom:1px solid var(--bd)}
+.hd b{display:block}
+.msg{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+#tm{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--cd);border-top:1px solid var(--bd);display:none;align-items:center;gap:10px}
+#tm b{font-size:26px;font-variant-numeric:tabular-nums;color:var(--ac)}
+#tm button{margin-left:auto;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:10px;padding:8px 12px}
+.rs{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--mu);margin-bottom:10px}
+.rs button{border:1px solid var(--bd);background:var(--cd);color:var(--tx);border-radius:8px;padding:6px 10px}
+.rs button.on{border-color:var(--ac);color:var(--ac)}
+</style></head><body>
+<header><h1>Meu Treino</h1><div class="sub" id="sub"></div></header>
+<nav id="nav"></nav><main id="app"></main>
+<div id="tm"><span>Descanso</span><b id="tt">0:00</b><button onclick="stopT()">Pular</button></div>
+<script>
+// Para mostrar GIFs: coloque a URL de cada exercício aqui (id "dia-posição"), ex.: "1-0":"https://.../supino.gif"
+// Funciona quando o arquivo está hospedado por você (ex.: GitHub Pages); na prévia do Claude imagens externas são bloqueadas.
+const GIFS={};
+const DN=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+const D={
+1:["Peito, ombros e tríceps",[
+["Supino reto com barra",3,"10–12","Escápulas juntas e firmes no banco; desça a barra até a linha do peito, cotovelos a cerca de 45° do tronco."],
+["Supino inclinado com halteres",3,"10–12","Banco a 30–45°; desça controlando até alinhar os cotovelos ao tronco e suba sem bater os halteres."],
+["Desenvolvimento com halteres",3,"10–12","Abdômen firme, sem arquear a lombar; empurre acima da cabeça e desça até a altura das orelhas."],
+["Elevação lateral",2,"12–15","Cotovelos levemente flexionados; suba até a altura dos ombros sem balançar o tronco."],
+["Tríceps corda",3,"12","Cotovelos colados ao corpo; estenda até o fim e abra a corda no final."]]],
+2:["Costas e bíceps",[
+["Puxada frontal",3,"10–12","Peito aberto; puxe a barra até a altura do queixo/peito levando os cotovelos para baixo."],
+["Remada baixa",3,"10–12","Coluna neutra; puxe o cabo em direção ao abdômen juntando as escápulas, sem jogar o tronco."],
+["Remada unilateral com halter",2,"10 cada lado","Apoie mão e joelho no banco; leve o halter ao quadril, cotovelo rente ao corpo."],
+["Crucifixo inverso na máquina",2,"12–15","Peito apoiado; abra os braços até a linha dos ombros, sem encolhê-los."],
+["Rosca direta",3,"10–12","Cotovelos fixos ao lado do corpo; suba sem balançar e desça devagar."],
+["Rosca martelo",2,"12","Pegada neutra (polegares para cima); cotovelos parados e movimento controlado."]]],
+3:["Quadríceps e panturrilhas",[
+["Agachamento livre",3,"10–12","Pés na largura dos ombros, pés bem apoiados; joelhos acompanham a direção dos pés; desça até onde a mobilidade permitir."],
+["Leg press 45°",3,"10–12","Lombar apoiada no encosto; não trave os joelhos no topo e desça de forma controlada."],
+["Cadeira extensora",3,"12–15","Estenda os joelhos até quase o fim, segure um instante e volte devagar."],
+["Mesa flexora",2,"12","Quadril colado ao banco; flexione levando os calcanhares em direção ao glúteo."],
+["Panturrilha em pé",3,"12–15","Amplitude completa: desça o calcanhar bem e suba na ponta dos pés, com pausa no topo."]]],
+4:["Peito, costas e braços",[
+["Supino máquina",3,"10–12","Ajuste o banco para as pegadas ficarem na altura do peito; empurre sem tirar as costas do encosto."],
+["Puxada neutra",3,"10–12","Pegada neutra; leve os cotovelos para baixo e para trás, sem balançar o tronco."],
+["Crossover",2,"12–15","Leve inclinação do tronco; una as mãos à frente do peito com cotovelos levemente flexionados."],
+["Remada articulada",2,"10–12","Peito apoiado; puxe até as escápulas se aproximarem e retorne com controle."],
+["Rosca alternada",2,"12","Um braço por vez, sem balançar; gire o punho para cima durante a subida."],
+["Tríceps na polia",2,"12","Cotovelos fixos; estenda por completo e volte devagar."]]],
+5:["Posterior, glúteos e abdômen",[
+["Stiff com halteres",3,"10–12","Joelhos levemente flexionados; leve o quadril para trás com a coluna reta e desça até sentir o posterior da coxa."],
+["Mesa flexora",3,"10–12","Quadril colado ao banco; suba e desça sem usar impulso."],
+["Elevação pélvica",3,"10–12","Queixo próximo ao peito; suba o quadril contraindo o glúteo, sem arquear a lombar."],
+["Cadeira abdutora",2,"12–15","Tronco apoiado; abra as pernas de forma controlada e volte devagar."],
+["Panturrilha sentada",3,"12–15","Amplitude completa, com pausa em cima e controle na descida."],
+["Prancha abdominal",3,"20–30 s","Corpo alinhado da cabeça aos calcanhares, abdômen e glúteos contraídos, sem deixar o quadril cair."]]]
+};
+const P=p=>Array.isArray(p[0])?p:[p,p],mv=p=>Array.isArray(p[0]);
+const an=(n,a,b)=>a===b?"":`<animate attributeName="${n}" values="${a};${b};${a}" dur="2.4s" repeatCount="indefinite"/>`;
+const seg=(a,b)=>{const m=mv(a)||mv(b);a=P(a);b=P(b);return `<line class="${m?"m":""}" x1="${a[0][0]}" y1="${a[0][1]}" x2="${b[0][0]}" y2="${b[0][1]}">${an("x1",a[0][0],a[1][0])}${an("y1",a[0][1],a[1][1])}${an("x2",b[0][0],b[1][0])}${an("y2",b[0][1],b[1][1])}</line>`};
+const hd=p=>{p=P(p);return `<circle r="8" cx="${p[0][0]}" cy="${p[0][1]}">${an("cx",p[0][0],p[1][0])}${an("cy",p[0][1],p[1][1])}</circle>`};
+const SH=[90,45],HP=[90,75],KN=[90,100],FT=[90,125],HH=[90,32],STD=[[SH,HP],[HP,KN],[KN,FT]],arm=(s,e,h)=>[[s,e],[e,h]];
+const BENCH='<line x1="30" y1="106" x2="125" y2="106" style="stroke:var(--mu)"/>',SEAT='<line x1="60" y1="99" x2="116" y2="99" style="stroke:var(--mu)"/>';
+const F={
+sup:[[42,93],[[[58,95],[110,95]],[[110,95],[138,78]],[[138,78],[150,112]],...arm([58,95],[[74,88],[60,72]],[[62,80],[60,52]])],BENCH],
+des:[HH,[...STD,...arm(SH,[[108,52],[93,27]],[[108,30],[93,7]])]],
+lat:[HH,[...STD,[SH,[[92,76],[122,50]]]]],
+tri:[HH,[...STD,...arm(SH,[95,72],[[112,66],[98,100]])]],
+pux:[HH,[...STD,...arm(SH,[[96,26],[82,57]],[[100,8],[98,42]])]],
+rem:[HH,[...STD,...arm(SH,[[108,52],[80,62]],[[126,56],[98,56]])]],
+ros:[HH,[...STD,...arm(SH,[93,72],[[93,98],[110,58]])]],
+cro:[HH,[...STD,[SH,[[66,66],[122,60]]]]],
+agc:[[[92,32],[85,55]],[[[92,45],[84,68]],[[92,75],[78,100]]].concat([]).length?[[[[92,45],[84,68]],[[92,75],[78,100]]],[[[92,75],[78,100]],[[92,100],[104,98]]],[[[92,100],[104,98]],[92,125]],[[[92,45],[84,68]],[[108,52],[106,72]]]]:[]],
+ext:[[78,50],[[[78,62],[78,95]],[[78,95],[112,95]],[[112,95],[[112,125],[146,100]]]],SEAT],
+fle:[HH,[[SH,HP],[HP,KN],[KN,[[90,125],[66,108]]]]],
+sti:[[[90,32],[130,56]],[[[[90,45],[118,60]],HP],[HP,KN],[KN,FT],[[[90,45],[118,60]],[[92,75],[122,92]]]]],
+pel:[[40,100],[[[55,100],[[105,114],[105,90]]],[[[105,114],[105,90]],[140,92]],[[140,92],[142,124]]],'<line x1="30" y1="108" x2="66" y2="108" style="stroke:var(--mu)"/>'],
+pan:[[[90,31],[96,21]],[[[[90,44],[96,34]],[[90,74],[96,64]]],[[[90,74],[96,64]],[[90,98],[96,88]]],[[[90,98],[96,88]],[[90,120],[96,112]]],[[[90,120],[96,112]],[104,125]]]],
+abd:[HH,[[SH,HP],[HP,KN],[KN,FT],[HP,[[92,100],[112,98]]],[[[92,100],[112,98]],[[92,125],[132,120]]]]],
+pra:[[28,84],[[[44,90],[[100,94],[100,97]]],[[[100,94],[100,97]],[130,101]],[[130,101],[152,112]],[[44,90],[44,115]],[[44,115],[64,115]]]]};
+const T=n=>{n=n.toLowerCase();return /supino/.test(n)?"sup":/desenvolv/.test(n)?"des":/lateral/.test(n)?"lat":/tríceps/.test(n)?"tri":/puxada/.test(n)?"pux":/remada|crucifixo inverso/.test(n)?"rem":/rosca/.test(n)?"ros":/agacha|leg press/.test(n)?"agc":/extensora/.test(n)?"ext":/flexora/.test(n)?"fle":/stiff/.test(n)?"sti":/pélvica/.test(n)?"pel":/panturrilha/.test(n)?"pan":/abdutora/.test(n)?"abd":/prancha/.test(n)?"pra":/crossover/.test(n)?"cro":"sup"};
+const fig=n=>{const [h,s,x]=F[T(n)];return `<svg viewBox="0 0 200 140" role="img" aria-label="${n}"><line x1="10" y1="127" x2="190" y2="127" style="stroke:var(--bd)"/>${x||""}${hd(h)}${s.map(([a,b])=>seg(a,b)).join("")}</svg>`};
+let S={};try{S=JSON.parse(localStorage.getItem("tr")||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem("tr",JSON.stringify(S))}catch(e){}};
+const now=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const dow=new Date().getDay();
+let tab=(dow>=1&&dow<=5)?dow:1,rest=90;
+try{rest=+localStorage.getItem("rs")||90}catch(e){}
+const rec=(id)=>{const t=now();S[t]=S[t]||{};return S[t][id]=S[t][id]||{s:[],l:""}};
+function toggle(id,k,n){const r=rec(id);r.s=Array.from({length:n},(_,i)=>!!r.s[i]);r.s[k]=!r.s[k];save();if(r.s[k])startT();render()}
+function setL(id,v){rec(id).l=v;save()}
+let iv=null,end=0;
+function startT(){end=Date.now()+rest*1e3;document.getElementById("tm").style.display="flex";clearInterval(iv);tick();iv=setInterval(tick,250)}
+function tick(){const s=Math.max(0,Math.ceil((end-Date.now())/1e3));document.getElementById("tt").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");if(!s){try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}stopT()}}
+function stopT(){clearInterval(iv);document.getElementById("tm").style.display="none"}
+function setRest(v){rest=v;try{localStorage.setItem("rs",v)}catch(e){}render()}
+function go(t){tab=t;render();scrollTo(0,0)}
+function render(){
+document.getElementById("sub").textContent=DN[dow]+", "+now().split("-").reverse().join("/");
+document.getElementById("nav").innerHTML=[1,2,3,4,5].map(d=>`<button class="${tab===d?"on":""} ${d===dow?"td":""}" onclick="go(${d})">${DN[d]}</button>`).join("")+`<button class="${tab==="h"?"on":""}" onclick="go('h')">Histórico</button>`;
+const a=document.getElementById("app");
+if(tab==="h"){
+const ds=Object.keys(S).sort().reverse().filter(d=>Object.values(S[d]).some(r=>r.s.some(Boolean)));
+a.innerHTML=ds.length?ds.map(d=>{let n=0,ls=[],dd=null;for(const id in S[d]){const r=S[d][id],c=r.s.filter(Boolean).length;if(!c)continue;n+=c;const [x,i]=id.split("-");dd=x;ls.push(D[x][1][i][0]+": "+c+" série(s)"+(r.l?" · "+r.l+" kg":""))}
+return `<div class="hd"><b>${d.split("-").reverse().join("/")} · ${D[dd][0]} · ${n} séries</b><span class="sub">${ls.join("<br>")}</span></div>`}).join(""):`<div class="msg">Nenhum treino registrado ainda. Marque as séries na aba do dia.</div>`;return}
+const [nome,ex]=D[tab];let tot=0,dn=0;
+const cards=ex.map(([n,s,r,c],i)=>{const id=tab+"-"+i,rc=rec(id),f=rc.s.slice(0,s).filter(Boolean).length;tot+=s;dn+=f;
+return `<div class="cd ${f===s?"done":""}"><div class="t">${n}<span>${s} × ${r}</span></div>
+<div class="sets">${Array.from({length:s},(_,k)=>`<button class="${rc.s[k]?"on":""}" onclick="toggle('${id}',${k},${s})">${rc.s[k]?"✓":k+1}</button>`).join("")}<input type="number" inputmode="decimal" placeholder="kg" value="${rc.l}" onchange="setL('${id}',this.value)"></div>
+<details><summary>Como executar</summary><div class="gif">${GIFS[id]?`<img src="${GIFS[id]}" alt="${n}" loading="lazy">`:fig(n)}</div><p>${c}</p><a href="https://www.youtube.com/results?search_query=${encodeURIComponent("como fazer "+n)}" target="_blank" rel="noopener">Ver vídeo de execução</a></details></div>`}).join("");
+a.innerHTML=(tab!==dow&&dow>=1&&dow<=5?`<div class="msg">Você está vendo o treino de ${DN[tab]}. Hoje é ${DN[dow]}.</div>`:"")+(dow===0||dow===6?`<div class="msg">Hoje é dia de recuperação. Descanse e durma bem.</div>`:"")+`<h2 style="font-size:18px;margin:8px 0 0">${nome}</h2><div class="bar"><i style="width:${tot?dn/tot*100:0}%"></i></div><div class="rs">Descanso: ${[60,90,120].map(v=>`<button class="${rest===v?"on":""}" onclick="setRest(${v})">${v}s</button>`).join("")}</div>`+cards}
+render();
+</script></body></html>
